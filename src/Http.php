@@ -8,18 +8,20 @@ use yii\base\Component;
 class Http extends Component
 {
 
-	public $url			= null;
-	public $publish = null;
-	public $call		= null;
-	public $secret	= null;
-	public $key			= null;
+	public $sslVerifyPeer = true;
+	public $timeout				= 5;
+	public $proxy					= null;
+
+	public $url						= null;
+
+	public $secret				= null;
+	public $key						= null;
 	
-	private $client	= null;
+	private $client				= null;
 
 	public function __construct() {
 
 		$this->client = new Client([
-				'base_url'				=> $this->url,
 				'responseConfig'	=> ['format' => Client::FORMAT_JSON],
 			]);
 
@@ -52,9 +54,9 @@ class Http extends Component
 
 	}
 
-	public function request($req, $uri, $args = null, $kwargs = null) {
+	private function request($req, $url, $uri, $args = null, $kwargs = null) {
 
-		$rq							= new \stdClass();
+		$rq	= new \stdClass();
 
 		if($req == 'call') {
 			$rq->procedure	= $uri;
@@ -62,28 +64,48 @@ class Http extends Component
 			$rq->topic			= $uri;
 		}
 
-		$rq->args				= [$msg];
-		$body						= json_encode($rq);
-		$params					= array_unshift($this->sign($body), ($req == 'call') ? $this->call : $this->publish);
-		$rp							= $this->client->post($params, $body)->send();
-
-		if($rp->isOk()) {
-			$rq			= new WAMPReply($rp->data);
+		if(!is_null($args)) {
+				$rq->args			= [$args];
 		}
 
-		return $rq;
+		if(!is_null($kwargs)) {
+				$rq->kwargs		= [$kwargs];
+		}
+
+		$body			= json_encode($rq);
+		$params		= $this->sign($body);
+
+		array_unshift($params, $this->url . $url);
+
+		$options	= [
+				'timeout'				=> $this->timeout,
+				'sslVerifyPeer'	=> $this->sslVerifyPeer,
+			];
+		
+		if($this->proxy != null) {
+			$options['proxy']	= $this->proxy;
+		}
+
+		$rp	= $this->client->post($params, $body, ['content-type' => 'application/json'], $options)->send();
+
+		if($rp->isOk) {
+			$rq			= new WAMPReply($rp->data);
+			return $rq;
+		}
+
+		return false;
 
 	}
 
-	public function publish($agent, \Matrix\Message $msg) {
+	public function publish($url, $topic, $args = null, $kwargs = null) {
 
-		return $this->request('publish', $agent, $msg);
+		return $this->request('publish', $url, $topic, $args, $kwargs);
 
 	}
 
-	public function call($agent, \Matrix\Message $msg) {
+	public function call($url, $procedure, $args = null, $kwargs = null) {
 
-		return $this->request('call', $agent, $msg);
+		return $this->request('call', $url, $procedure, $args, $kwargs);
 
 	}
 
