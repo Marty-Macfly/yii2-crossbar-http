@@ -23,13 +23,13 @@ Inspired from [Symfony/Crossbar HTTP Publisher Bundle](https://github.com/facile
 As simple as download it 
 
 ```console
-$ composer require macfly/yii2-crossbar-http dev-master
+$ composer require macfly/yii2-crossbar-http "1.*"
 ```
 
 or add
 
 ```json
-"yiisoft/yii2-authclient": "dev-master"
+"macfly/yii2-crossbar-http: "1.*"
 ```
 
 to the `require` section of your composer.json.
