@@ -2,6 +2,8 @@
 
 This extension allows to submit PubSub and CallReg events via HTTP/POST requests to a [Crossbar HTTP Publisher](http://crossbar.io/docs/HTTP-Bridge-Publisher/) and [Crossbar HTTP Caller](http://crossbar.io/docs/HTTP-Bridge-Caller/).
 
+[Crossbar.io](http://crossbar.io/) is a networking platform for distributed and microservice applications, implementing the open [Web Application Messaging Protocol (WAMP)](http://wamp-proto.org/). It is feature rich, scalable, robust and secure. Let Crossbar.io take care of the hard parts of messaging so you can focus on your app's features. 
+
 ####Supports:
 
 * [Signed requests](http://crossbar.io/docs/HTTP-Bridge-Publisher/#signed-requests)
