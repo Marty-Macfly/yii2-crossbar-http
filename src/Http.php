@@ -2,7 +2,7 @@
 
 namespace yii\crossbar;
 
-use GuzzleHttp\Client;
+use yii\httpclient\Client;
 use yii\base\Component;
 
 class Http extends Component
@@ -16,18 +16,11 @@ class Http extends Component
 	
 	private $client	= null;
 
-	public function connect() {
-
-		if($this->client != null) {
-			return;
-		}
+	public function __construct() {
 
 		$this->client = new Client([
-					'base_uri'  => $this->url,
-					'request.options' => [
-						'headers'       => ['Content-Type' => 'application/json'],
-						'exceptions'    => false,
-				],
+				'base_url'				=> $this->url,
+				'responseConfig'	=> ['format' => Client::FORMAT_JSON],
 			]);
 
 	}
@@ -61,8 +54,6 @@ class Http extends Component
 
 	public function request($req, $uri, $args = null, $kwargs = null) {
 
-		$this->connect();
-
 		$rq							= new \stdClass();
 
 		if($req == 'call') {
@@ -73,14 +64,11 @@ class Http extends Component
 
 		$rq->args				= [$msg];
 		$body						= json_encode($rq);
-		$rp							= $this->client->post(($req == 'call') ? $this->call : $this->publish, [
-				'body'	=> $body,
-				'query' => $this->sign($body),
-			]);
+		$params					= array_unshift($this->sign($body), ($req == 'call') ? $this->call : $this->publish);
+		$rp							= $this->client->post($params, $body)->send();
 
-		if($rp->getStatusCode() == 200) {
-			$body		= $rp->getBody();
-			$rq			= new WAMPReply(json_decode($body));
+		if($rp->isOk()) {
+			$rq			= new WAMPReply($rp->data);
 		}
 
 		return $rq;
