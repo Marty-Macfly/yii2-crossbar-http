@@ -14,7 +14,7 @@
 			"email": "c.delfly@linkbynet.com"
 		}
 	],
-	"minimum-stability": "dev",
+	"minimum-stability": "stable",
 	"require": {
 		"yiisoft/yii2-httpclient": "~2.0.1"
 	},
