@@ -65,7 +65,7 @@ class Http extends Component
 		}
 
 		if(!is_null($args)) {
-				$rq->args			= [$args];
+				$rq->args			= $args;
 		}
 
 		if(!is_null($kwargs)) {
